@@ -27,6 +27,7 @@ view model =
   Graphics.Element.show model
 
 
+-- GLUE IT ALL TOGETHER!
 main : Signal Element
 main =
   Signal.map view model
