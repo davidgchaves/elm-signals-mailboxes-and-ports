@@ -3,11 +3,11 @@ import Keyboard
 import Char
 
 
-characters : Signal Char
-characters =
-  Signal.map Char.fromCode Keyboard.presses
-
-
+-- Signal KeyCode |> Signal Char |> Signal Char |> Signal Char |> Signal Element
 main : Signal Element
 main =
-  Signal.map show characters
+  Keyboard.presses
+    |> Signal.map Char.fromCode
+    |> Signal.filter Char.isDigit '0'
+    |> Signal.dropRepeats
+    |> Signal.map show
