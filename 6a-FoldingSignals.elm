@@ -4,7 +4,7 @@ import Keyboard         exposing (presses)
 
 -- Signal KeyCode
 --   |> Signal Int (past dependant signal -- accumulate the number of key presses)
---   |> Signal ELement
+--   |> Signal Element
 main : Signal Element
 main =
   Keyboard.presses
