@@ -12,7 +12,13 @@ initialModel = 0
 
 model : Signal Model
 model =
-  Signal.foldp (\_ count -> count + 1) initialModel Mouse.clicks
+  Signal.foldp update initialModel Mouse.clicks
+
+
+-- UPDATE
+update : a -> Model -> Model
+update event model =
+  model + 1
 
 
 main : Signal Element
