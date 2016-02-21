@@ -21,6 +21,12 @@ update event model =
   model + 1
 
 
+-- VIEW
+view : Model -> Element
+view model =
+  Graphics.Element.show model
+
+
 main : Signal Element
 main =
-  Signal.map Graphics.Element.show model
+  Signal.map view model
