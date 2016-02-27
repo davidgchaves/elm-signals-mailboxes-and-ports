@@ -23,6 +23,6 @@ view (mouseX, mouseY) =
     collage w h [ drawCircle x y ]
 
 
-main : Element
+main : Signal Element
 main =
-  view (100, 100)
+  Signal.map view Mouse.position
