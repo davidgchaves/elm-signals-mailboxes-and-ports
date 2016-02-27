@@ -107,7 +107,12 @@ direction =
 
 fire : Signal Action
 fire =
-  Signal.map Fire Keyboard.space
+  let
+    fiveTimesPerSecond = Time.fps 5
+  in
+    Keyboard.space
+      |> Signal.map Fire
+      |> Signal.sampleOn fiveTimesPerSecond
 
 
 ticker : Signal Action
