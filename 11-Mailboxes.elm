@@ -8,6 +8,9 @@ view greeting =
     [ button
         [ on "click" targetValue (\_ -> Signal.message inbox.address "Hello") ]
         [ text "Click for English" ],
+      button
+        [ on "click" targetValue (\_ -> Signal.message inbox.address "Salut") ]
+        [ text "Click for French" ],
       p [ ] [ text greeting ]
     ]
 
