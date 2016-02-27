@@ -92,7 +92,7 @@ drawShip gameHeight ship =
 direction : Signal Action
 direction =
   let
-    delta = Time.fps 30
+    thirtyTimesPerSecond = Time.fps 30
     toAction n =
       case n of
         -1 -> Left
@@ -102,7 +102,7 @@ direction =
     Keyboard.arrows
       |> Signal.map .x
       |> Signal.map toAction
-      |> Signal.sampleOn delta
+      |> Signal.sampleOn thirtyTimesPerSecond
 
 
 fire : Signal Action
