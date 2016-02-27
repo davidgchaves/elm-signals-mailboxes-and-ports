@@ -72,18 +72,25 @@ The Signal Transfomation:
 
 Signal {x: Int, y: Int}
   |> Signal Int
+  |> Signal Int
   |> Signal Model
   |> Signal Element
 
 Keyboard.arrows
   |> Signal.map .x                   -- direction
+  |> Signal.sampleOn delta           -- direction
   |> Signal.foldp update initialShip -- model
   |> Signal.map view                 -- main
 -}
 
 direction : Signal Int
 direction =
-  Signal.map .x Keyboard.arrows
+  let
+    delta = Time.fps 30
+  in
+    Keyboard.arrows
+      |> Signal.map .x
+      |> Signal.sampleOn delta
 
 
 model : Signal Model
