@@ -6,10 +6,10 @@ view : String -> Html
 view greeting =
   div []
     [ button
-        [ on "click" targetValue (\_ -> Signal.message inbox.address "Hello") ]
+        [ onClick inbox.address "Hello" ]
         [ text "Click for English" ],
       button
-        [ on "click" targetValue (\_ -> Signal.message inbox.address "Salut") ]
+        [ onClick inbox.address "Salut" ]
         [ text "Click for French" ],
       p [ ] [ text greeting ]
     ]
