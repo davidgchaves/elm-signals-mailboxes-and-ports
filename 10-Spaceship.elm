@@ -32,6 +32,7 @@ type Action
   = NoOp
   | Left
   | Right
+  | Fire Bool
 
 
 update : Action -> Model -> Model
@@ -43,6 +44,11 @@ update action ship =
       { ship | position = ship.position - 1 }
     Right ->
       { ship | position = ship.position + 1 }
+    Fire firing ->
+      { ship |
+          isFiring = firing,
+          powerLevel = if firing then ship.powerLevel - 1 else ship.powerLevel
+      }
 
 
 -- VIEW
@@ -78,23 +84,7 @@ drawShip gameHeight ship =
       |> alpha ((toFloat ship.powerLevel) / 10)
 
 
-{-
-The Signal Transfomation:
-
-Signal {x: Int, y: Int}
-  |> Signal Int
-  |> Signal Action
-  |> Signal Action
-  |> Signal Model
-  |> Signal Element
-
-Keyboard.arrows
-  |> Signal.map .x                            -- direction
-  |> Signal.map toAction                      -- direction
-  |> Signal.sampleOn delta                    -- direction
-  |> Signal.foldp update initialShip          -- model
-  |> Signal.map2 view Window.dimensions model -- main
--}
+-- SIGNALS
 
 direction : Signal Action
 direction =
@@ -112,9 +102,19 @@ direction =
       |> Signal.sampleOn delta
 
 
+fire : Signal Action
+fire =
+  Signal.map Fire Keyboard.space
+
+
+input : Signal Action
+input =
+  Signal.merge direction fire
+
+
 model : Signal Model
 model =
-  Signal.foldp update initialShip direction
+  Signal.foldp update initialShip input
 
 
 main : Signal Element
