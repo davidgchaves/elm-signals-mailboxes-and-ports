@@ -26,6 +26,13 @@ initialShip =
   }
 
 
+-- UPDATE
+
+update : Int -> Model -> Model
+update x ship =
+  { ship | position = ship.position + x }
+
+
 -- VIEW
 
 view : Model -> Element
@@ -60,6 +67,30 @@ drawShip gameHeight ship =
       |> alpha ((toFloat ship.powerLevel) / 10)
 
 
-main : Element
+{-
+The Signal Transfomation:
+
+Signal {x: Int, y: Int}
+  |> Signal Int
+  |> Signal Model
+  |> Signal Element
+
+Keyboard.arrows
+  |> Signal.map .x                   -- direction
+  |> Signal.foldp update initialShip -- model
+  |> Signal.map view                 -- main
+-}
+
+direction : Signal Int
+direction =
+  Signal.map .x Keyboard.arrows
+
+
+model : Signal Model
+model =
+  Signal.foldp update initialShip direction
+
+
+main : Signal Element
 main =
-  view initialShip
+  Signal.map view model
