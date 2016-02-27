@@ -33,6 +33,7 @@ type Action
   | Left
   | Right
   | Fire Bool
+  | Tick
 
 
 update : Action -> Model -> Model
@@ -49,6 +50,8 @@ update action ship =
           isFiring = firing,
           powerLevel = if firing then ship.powerLevel - 1 else ship.powerLevel
       }
+    Tick ->
+      { ship | powerLevel = if ship.powerLevel < 10 then ship.powerLevel + 1 else ship.powerLevel }
 
 
 -- VIEW
@@ -107,9 +110,15 @@ fire =
   Signal.map Fire Keyboard.space
 
 
+ticker : Signal Action
+ticker =
+--Signal.map (\_ -> Tick) (Time.every Time.second)
+  Signal.map (always Tick) (Time.every Time.second)
+
+
 input : Signal Action
 input =
-  Signal.merge direction fire
+  Signal.mergeMany [direction, fire, ticker]
 
 
 model : Signal Model
