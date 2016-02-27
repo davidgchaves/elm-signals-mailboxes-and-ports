@@ -28,9 +28,21 @@ initialShip =
 
 -- UPDATE
 
-update : Int -> Model -> Model
-update x ship =
-  { ship | position = ship.position + x }
+type Action
+  = NoOp
+  | Left
+  | Right
+
+
+update : Action -> Model -> Model
+update action ship =
+  case action of
+    NoOp ->
+      ship
+    Left ->
+      { ship | position = ship.position - 1 }
+    Right ->
+      { ship | position = ship.position + 1 }
 
 
 -- VIEW
@@ -71,24 +83,32 @@ The Signal Transfomation:
 
 Signal {x: Int, y: Int}
   |> Signal Int
-  |> Signal Int
+  |> Signal Action
+  |> Signal Action
   |> Signal Model
   |> Signal Element
 
 Keyboard.arrows
   |> Signal.map .x                            -- direction
+  |> Signal.map toAction                      -- direction
   |> Signal.sampleOn delta                    -- direction
   |> Signal.foldp update initialShip          -- model
   |> Signal.map2 view Window.dimensions model -- main
 -}
 
-direction : Signal Int
+direction : Signal Action
 direction =
   let
     delta = Time.fps 30
+    toAction n =
+      case n of
+        -1 -> Left
+        1 -> Right
+        _ -> NoOp
   in
     Keyboard.arrows
       |> Signal.map .x
+      |> Signal.map toAction
       |> Signal.sampleOn delta
 
 
