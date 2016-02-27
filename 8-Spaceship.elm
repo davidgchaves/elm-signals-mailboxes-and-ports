@@ -35,10 +35,9 @@ update x ship =
 
 -- VIEW
 
-view : Model -> Element
-view ship =
+view : (Int, Int) -> Model -> Element
+view (w, h) ship =
   let
-    (w, h) = (400, 400)
     (w', h') = (toFloat w, toFloat h)
   in
     collage w h
@@ -77,10 +76,10 @@ Signal {x: Int, y: Int}
   |> Signal Element
 
 Keyboard.arrows
-  |> Signal.map .x                   -- direction
-  |> Signal.sampleOn delta           -- direction
-  |> Signal.foldp update initialShip -- model
-  |> Signal.map view                 -- main
+  |> Signal.map .x                            -- direction
+  |> Signal.sampleOn delta                    -- direction
+  |> Signal.foldp update initialShip          -- model
+  |> Signal.map2 view Window.dimensions model -- main
 -}
 
 direction : Signal Int
@@ -100,4 +99,4 @@ model =
 
 main : Signal Element
 main =
-  Signal.map view model
+  Signal.map2 view Window.dimensions model
