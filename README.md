@@ -535,21 +535,20 @@ ticker = Signal.map Tick           (Time.every Time.second)
 
 ## 11. Mailboxes
 
-In an HTML App we don't have built-in 'Signals' for HTML inputs (such us `buttons`, `forms` ...).
-
-That's what `mailboxes` are for.
-
-To **react** to HTML inputs we use a `mailbox`.
-
 ### What is a `Mailbox`?
 
-- A `Mailbox` is a communication hub (can receive messages).
+A `Mailbox` is a communication hub that can receive **messages** of a given type.
+
+### What are `mailboxes` for?
+
+In an `HTML` application we don't have built-in `Signals` to **react** to HTML inputs such us `buttons` and `forms`. That's what `mailboxes` are for (**react** to `HTML` inputs).
 
 ### What is a `Mailbox` made up of?
 
-- A `Mailbox` is made up of:
-	- an `Address` that you can send messages to
-	- a `Signal` of messages sent to the `mailbox`
+A `Mailbox` is made up of:
+
+- An `Address` that you can send **messages** of type `a` to.
+- A `Signal` of **messages** of type `a` sent to the `mailbox`.
 
 ```elm
 type alias Mailbox a =
@@ -560,8 +559,14 @@ type alias Mailbox a =
 
 ### How does a `Mailbox` operate?
 
-- When a **message** is sent to a `mailbox`'s `address`, the associated `Signal` is updated with the **message**.
-- The associated `Signal` have all the **messages** sent to that `Mailbox`'s `address`.
+From a `Mailbox`'s associated `Signal` standpoint:
+
+- The associated `Signal` is updated with the **message**, when a **message** is sent to the `Mailbox`'s `address`.
+- The associated `Signal` contains all the **messages** sent to that `Mailbox`'s `address`.
+
+### How to think about `Mailboxes`
+
+You can think about `Mailboxes` as `Signals` that have an `address` you can send `messages` to.
 
 ### The `Mailbox` cycle
 
@@ -594,8 +599,7 @@ messages =
   inbox.signal
 ```
 
-#### 3. Send a message to the `Mailbox` when something happened
-
+#### 3. Send a message to the `Mailbox` when something happens
 
 Example: *When we click a button*
 
@@ -610,17 +614,125 @@ view greeting =
     ]
 ```
 
+#### 4. Send a message to the `Mailbox` when something happens refactored (i)
+
+It's more idiomatic to pass the `Signal`'s `address` into the `view` function instead of explicitly access `inbox.address`:
+
+```elm
+view : Signal.Address String -> String -> Html
+view address greeting =
+  div []
+    [ button
+        [ on "click" targetValue (\_ -> Signal.message address "Hello") ]
+        [ text "Click for English" ],
+      p [ ] [ text greeting ]
+    ]
+```
+
+#### 5. Send a message to the `Mailbox` when something happens refactored (ii)
+
+In this case we could also hide some of the boilerplate using the `onClick` handler
+
+```elm
+view : Signal.Address String -> String -> Html
+view address greeting =
+  div []
+    [ button
+        [ onClick address "Hello" ]
+        [ text "Click for English" ],
+      p [ ] [ text greeting ]
+    ]
+```
 
 ### `on "click"` vs `onClick`
 
 ```elm
-[ on "click" targetValue (\_ -> Signal.message inbox.address "Hello") ]
-[ onClick                                      inbox.address "Hello" ]
+[ on "click" targetValue (\_ -> Signal.message address "Hello") ]
+[ onClick                                      address "Hello" ]
 ```
+
+### From `on "click"` to `onClick` passing through `messageOn`
+
+#### `on`
+
+[`on`](http://package.elm-lang.org/packages/evancz/elm-html/4.0.2/Html-Events#on), defined in the `Html.Events` module:
+
+```elm
+on : String -> Json.Decoder a -> (a -> Signal.Message) ->
+     Html.Attribute
+on =
+  VirtualDom.on
+```
+
+- 1st argument (`String`):
+	- the name of the event to attach (`"click"`).
+- 2nd argument (`Json.Decoder a`):
+	- the decoder used to convert the JavaScript event to Elm ([`targetValue`](http://package.elm-lang.org/packages/evancz/elm-html/4.0.2/Html-Events#targetValue), a `Json.Decoder` for grabbing `event.target.value` from the triggered event).
+- 3rd argument (`(a -> Signal.Message)`):
+	- a function specifying what to do with the event when it occurs (`(\_ -> Signal.message address "Hello")`, sends the `"Hello"` message to the specified `address`).
+- Return (`Html.Attribute`).
+
+#### `onClick`
+[`onClick`](http://package.elm-lang.org/packages/evancz/elm-html/4.0.2/Html-Events#onClick), defined in the `Html.Events` module:
+
+```elm
+onClick : Signal.Address a -> a -> Html.Attribute
+onClick =
+  messageOn "click"
+```
+
+#### `messageOn`
+
+[`messageOn`](https://github.com/evancz/elm-html/blob/master/src/Html/Events.elm#L132), undocumented utility function used in every `onXXX` function
+
+```elm
+messageOn : String -> Signal.Address a -> a -> Html.Attribute
+messageOn name address msg =
+  on name value (\_ -> Signal.message address message)
+```
+
+where [`value`](http://package.elm-lang.org/packages/elm-lang/core/3.0.0/Json-Decode#value)
+
+```elm
+value : Decoder Value
+value =
+    Native.Json.decodeValue
+```
+
+#### Conclusion
+
+So `onXXX` is just a wrapper around the primitive `on` function, which uses the `messageOn` utility function underneath.
+
+### `Mailbox` related types
+
+#### The `Mailbox` itself
+
+```elm
+Signal.Mailbox a
+```
+
+#### The associated `address`
+
+```elm
+Signal.Address a
+```
+
+#### The associated `signal`
+
+```elm
+Signal a
+```
+
+### Type constructors for `Mailbox` and `Address`
+
+`Signal.Mailbox` and `Signal.Address` are type constructors, since you always have to give it another type as an argument (the `a`), such as `String` or `Int`, so:
+
+- When we declare `Signal.Mailbox String` we get a type for a `mailbox` that has values (**messages**) of type `String`.
+- When we declare `Signal.Address String` we get a type for an `address` where we can send values (**messages**) of type `String`.
+
 
 ### TODOs:
 
-- Take notes from 11 Mailboxes Notes
 - Take notes from 12 Html App Example
 - Take notes from 13 Ports
 - Take notes from 14 Wrap Up
