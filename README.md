@@ -731,8 +731,167 @@ Signal a
 - When we declare `Signal.Address String` we get a type for an `address` where we can send values (**messages**) of type `String`.
 
 
+## 12. `HTML` App Example
+
+How to maintain state in an `HTML` application
+
+### Workflow
+
+#### 1. Create a `Mailbox` for `Actions` and initialize it
+
+```elm
+inbox : Signal.Mailbox Action
+inbox =
+  Signal.mailbox NoOp
+```
+
+#### 2. Tune in to its `Signal`
+
+```elm
+actions : Signal Action
+actions =
+  inbox.signal
+```
+
+#### 3. Update the `model` when new `actions` arrive
+
+Every time we get an `action` on the `mailbox`'s `signal` we need to update our `Model` based on its previous state (hint: `foldp`)
+
+```elm
+model : Signal Model
+model =
+  Signal.foldp update initialModel actions
+```
+
+`model` always represents the current state of the app.
+
+#### 4. Update `main` to use the `model` `Signal`
+
+**Before**
+
+```elm
+main : Html
+main =
+  view initialModel
+```
+
+**After**
+
+```elm
+main : Signal Html
+main =
+  Signal.map view model
+```
+
+#### 5. Explicitly pass the `address` to the `view`
+
+```elm
+view : Signal.Address Action -> Model -> Html
+```
+
+#### 6. Fix `main` to explicitly pass the `address` to the `view`
+
+```elm
+main : Signal Html
+main =
+  Signal.map (view inbox.address) model
+```
+
+### The 3 `signals` of every `HTML` application
+
+There's at least 3 `signals` in every `HTML` application that mantains state:
+
+- `Signal Action`
+	- Associated with the `Mailbox`.
+	- Updates when `actions` are sent to the `Mailbox` in response to user events (i.e. a button click).
+- `Signal Model`
+	- `foldp` over the `Signal Action`.
+	- Transforms the `model` to reflect updates in `Signal Action`.
+- `Signal Html`
+	- Renders the values on the `Signal Model` by applying the `view` function.
+
+### Understanding `StartApp.Simple.start`
+
+`StartApp.Simple.start`:
+
+- Creates a `Mailbox`
+- Calls `foldp` with our `update` function
+- Uses our `initialModel` as the initial value of the `foldp`.
+- Applies our `view` function to the resulting `Signal Model` to render new models.
+
+
+We can think of `StartApp` as a wrapper around this boilerplate:
+
+- Use `StarApp` if you can.
+- Go full `Mailbox` + `Signals` if you need it.
+
+### `StartApp` vs Explicit `Mailbox`
+
+#### `StarApp`
+
+```elm
+import StartApp.Simple
+
+main : Signal Html
+main =
+  StartApp.Simple.start
+    { model = initialModel,
+      view = view,
+      update = update
+    }
+```
+
+#### Explicit `Mailbox`
+
+```elm
+inbox : Signal.Mailbox Action
+inbox =
+  Signal.mailbox NoOp
+
+actions : Signal Action
+actions =
+  inbox.signal
+
+model : Signal Model
+model =
+  Signal.foldp update initialModel actions
+
+main : Signal Html
+main =
+  Signal.map (view inbox.address) model
+```
+
+### Naming Conventions
+
+#### With a `Signal Action`
+
+```elm
+inbox : Signal.Mailbox Action
+inbox =
+  Signal.mailbox NoOp
+
+actions : Signal Action
+actions =
+  inbox.signal
+
+model : Signal Model
+model =
+  Signal.foldp update initialModel actions
+```
+
+####  Without a `Signal Action`
+
+```elm
+actions : Signal.Mailbox Action
+actions =
+  Signal.mailbox NoOp
+
+model : Signal Model
+model =
+  Signal.foldp update initialModel actions.signal
+```
+
 ### TODOs:
 
-- Take notes from 12 Html App Example
 - Take notes from 13 Ports
 - Take notes from 14 Wrap Up
