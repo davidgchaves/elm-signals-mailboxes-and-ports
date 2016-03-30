@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Thumbs</title>
-  <script type="text/javascript" src="elm.js"></script>
+  <script type="text/javascript" src="thumbs.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -18,10 +18,14 @@
 </body>
 
 <script type="text/javascript">
-  var elmDiv = document.getElementById('elm-app-lives-here');
-  var elmApp = Elm.embed(Elm.Thumbs, elmDiv);
+  var elmApp = Elm.embed(
+    Elm.Thumbs,
+    document.getElementById('elm-app-lives-here'),
+    { comments: '' }
+  );
 
-  function sendComment(form) {
+  function sendComment (form) {
+    elmApp.ports.comments.send(form.comment.value);
     form.reset();
     return false;
   }

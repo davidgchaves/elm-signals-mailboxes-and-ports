@@ -62,6 +62,10 @@ commentList comments =
     ul [ ] commentItems
 
 
+-- PORTS
+
+port comments : Signal String
+
 -- SIGNALS
 
 inbox : Signal.Mailbox Action
@@ -71,7 +75,7 @@ inbox =
 
 actions : Signal Action
 actions =
-  inbox.signal
+  Signal.merge inbox.signal (Signal.map AddComment comments)
 
 
 model : Signal Model
