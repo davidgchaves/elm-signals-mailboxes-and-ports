@@ -951,7 +951,7 @@ Takes three arguments:
 
 ```elm
 (1)
-port comments : Signal String
+port comments : Signal String
 ```
 
 ```javascript
