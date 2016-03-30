@@ -1,4 +1,4 @@
-# Notes on Mike Clark's Course: Elm Signals, Mailboxes & Ports
+# Notes on *Mike Clark's Course: Elm Signals, Mailboxes & Ports*
 
 ## 2. `Signal`s in Action
 
@@ -891,7 +891,133 @@ model =
   Signal.foldp update initialModel actions.signal
 ```
 
-### TODOs:
 
-- Take notes from 13 Ports
-- Take notes from 14 Wrap Up
+## 13. `Ports`
+
+Another common use case for `Signals` in an `HTML App` is to communicate with Javascript, using `Ports`:
+
+- Sending messages from Javascript into `Elm` through an **incoming `port`**.
+- Sending messages from `Elm` to Javascript through an **outgoing `port`**.
+
+
+### Embedding (integrating) `Elm` in an existing Javascript project
+
+We need to:
+
+1. Reference the compiled version of our `Elm App` (`thumbs.js`).
+2. Have a placeholder to embed our `Elm App`.
+3. Call `Elm.embed` to attach the `Elm App` into its `HTML` container (quite similar to `ReactDOM`'s `render` method).
+
+
+```html
+(1)
+<head>
+  <script type="text/javascript" src="thumbs.js"></script>
+</head>
+
+(2)
+<body>
+  <div id="elm-app-lives-here"></div>
+</body>
+
+(3)
+<script type="text/javascript">
+  Elm.embed(
+    Elm.Thumbs,
+    document.getElementById('elm-app-lives-here')
+  );
+</script>
+```
+
+### `Elm.embed`
+
+Takes three arguments:
+
+1. The name of the module where our `Elm App` is defined (remember that in Javascript land every `Elm Module` is namespaced with `Elm`, like in `Elm.Thumbs`).
+2. The `HTML` element we want to embed our `Elm App` into.
+3. **(OPTIONAL)** An object to give `Ports` an initial value.
+
+### Create the compiled version of our `Elm App`
+
+```console
+✔ elm make Thumbs.elm --output thumbs.js
+```
+
+### Incoming `port` Example
+
+1. Define the incoming `port` in your `Elm App` (you can name your `port` however you deem fit).
+2. Give an initial value to the `signal` associated to your `port` (from your `Javascript App`).
+3. Send messages to the `signal` from Javascript land using the `send()` function.
+
+```elm
+(1)
+port comments : Signal String
+```
+
+```javascript
+var elmApp = Elm.embed(
+  Elm.Thumbs,
+  document.getElementById('elm-app-lives-here'),
+  (2)
+  { comments: '' }
+);
+
+(3)
+elmApp.ports.comments.send('My first comment');
+```
+
+### Outgoing `port` Example
+
+1. Define the outgoing `port` in your `Elm App` (you can name your `port` however you deem fit).
+2. Define the outgoing `port`.
+3. Subscribe to the `port` from your `Javascript App`.
+
+```elm
+(1)
+port modelChanges : Signal Model
+
+(2)
+port modelChanges =
+  model
+
+-- Where `model` was previously defined as
+model : Signal Model
+model =
+  Signal.foldp update initialModel actions
+```
+
+```javascript
+(3)
+elmApp.ports.modelChanges.subscribe((model) => console.log(model));
+```
+
+### `Ports` and `Signals`
+
+Elm `Ports` don't have to be Elm `Signals`, but they usually are.
+
+
+## 14. Next Steps
+
+
+### Elm Guides
+
+- [The Elm Architecture Tutorial](https://github.com/evancz/elm-architecture-tutorial/).
+- [The Reactivity Guide](http://elm-lang.org/guide/reactivity): More on `Signals` and `Tasks` premier.
+- [The Interop Guide](http://elm-lang.org/guide/interop): More `Ports` examples.
+- [The Elm Mailing List](https://groups.google.com/forum/#!forum/elm-discuss).
+
+### Html Apps
+
+- [Introducing Elm to a JS React/Flux Web App](http://tech.noredink.com/post/126978281075/walkthrough-introducing-elm-to-a-js-web-app): From `Flux` to Elm.
+- Real World Elm [Part 1](http://engineering.truqu.com/2015/08/19/real-world-elm-part-1.html) and [Part 2](http://engineering.truqu.com/2015/09/25/real-world-elm-part-2.html) tutorials.
+
+### Games
+
+- [Switching from imperative to functional programming with games in Elm](https://github.com/Dobiasd/articles/blob/master/switching_from_imperative_to_functional_programming_with_games_in_Elm.md).
+- [Making Pong: An intro to games in Elm](http://elm-lang.org/blog/making-pong).
+- [Pong](http://elm-lang.org/examples/pong).
+- [Breakout](https://github.com/Dobiasd/Breakout).
+- [Asteroids clone](https://github.com/irh/asteroids).
+- [Destroid](https://github.com/BlackBrane/destroid).
+- [PewPew](https://github.com/FireflyLogic/pewpew).
+- [Elm Street 404](https://github.com/zalando/elm-street-404).
