@@ -814,8 +814,8 @@ There's at least 3 `signals` in every `HTML` application that mantains state:
 
 `StartApp.Simple.start`:
 
-- Creates a `Mailbox`
-- Calls `foldp` with our `update` function
+- Creates a `Mailbox`.
+- Calls `foldp` with our `update` function.
 - Uses our `initialModel` as the initial value of the `foldp`.
 - Applies our `view` function to the resulting `Signal Model` to render new models.
 
