@@ -18,21 +18,31 @@
 </body>
 
 <script type="text/javascript">
+  var thumbsModel = localStorage.getItem('thumbs-model');
+  var startingModel = thumbsModel ? JSON.parse(thumbsModel) : null;
   var elmApp = Elm.embed(
     Elm.Thumbs,
     document.getElementById('elm-app-lives-here'),
-    { comments: '' }
+    {
+      comments: '',
+      getStoredModel: startingModel
+    }
   );
 
   elmApp.ports.modelChanges.subscribe(function (model) {
     console.log(model);
   });
 
+  elmApp.ports.setStoredModel.subscribe(function (model) {
+    localStorage.setItem('thumbs-model', JSON.stringify(model));
+  })
+
   function sendComment (form) {
     elmApp.ports.comments.send(form.comment.value);
     form.reset();
     return false;
   }
+
 </script>
 
 </html>

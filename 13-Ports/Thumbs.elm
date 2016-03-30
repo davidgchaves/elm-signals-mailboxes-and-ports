@@ -15,10 +15,14 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-  { ups = 0,
-    downs = 0,
-    comments = []
-  }
+  let
+    emptyModel =
+      { ups = 0,
+        downs = 0,
+        comments = []
+      }
+  in
+    Maybe.withDefault emptyModel getStoredModel
 
 
 -- UPDATE
@@ -68,6 +72,12 @@ port comments : Signal String
 
 port modelChanges : Signal Model
 port modelChanges =
+  model
+
+port getStoredModel: Maybe Model
+
+port setStoredModel : Signal Model
+port setStoredModel =
   model
 
 -- SIGNALS
