@@ -24,6 +24,10 @@
     { comments: '' }
   );
 
+  elmApp.ports.modelChanges.subscribe(function (model) {
+    console.log(model);
+  });
+
   function sendComment (form) {
     elmApp.ports.comments.send(form.comment.value);
     form.reset();

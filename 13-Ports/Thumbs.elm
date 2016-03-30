@@ -66,6 +66,10 @@ commentList comments =
 
 port comments : Signal String
 
+port modelChanges : Signal Model
+port modelChanges =
+  model
+
 -- SIGNALS
 
 inbox : Signal.Mailbox Action
